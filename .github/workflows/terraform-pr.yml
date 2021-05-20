@@ -7,7 +7,7 @@
 #
 # 1. Create a `main.tf` file in the root of this repository with the `remote` backend and one or more resources defined.
 #   Example `main.tf`:
-#     # The configuration for the `remote` backend.
+#     The configuration for the `remote` backend.
 #     terraform {
 #       backend "s3" {
 #        bucket = "bucket"
@@ -17,7 +17,7 @@
 #      }
 #     }
 #
-#     # An example resource that does nothing.
+#     An example resource that does nothing.
 #     resource "null_resource" "example" {
 #       triggers = {
 #         value = "A example resource that does nothing!"
@@ -28,7 +28,6 @@
 # 2. Generate an api key using https://www.infracost.io/docs/ and add it to GitHub Secrets
 #
 # 3. Generate an aws access key ID and secret access key and add it to GitHub Secrets
-#   
 
 name: terraform-pr
 on:
@@ -108,4 +107,3 @@ jobs:
     - uses: triat/terraform-security-scan@v2.2.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-		
