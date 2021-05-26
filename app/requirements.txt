@@ -1,7 +1,6 @@
-Flask==0.3
+Flask
 coverage
 flask-s3
-pytest
+pytest-flask
 pytest-cov
-flask-cors
 wemake-python-styleguide
