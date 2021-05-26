@@ -15,7 +15,7 @@ jobs:
           with:
             args: >
               -Dsonar.python.coverage.reportPaths=coverage.xml
-              -Dsonar.projectKey=python-demo
+              -Dsonar.projectKey=demo-app
               -Dsonar.verbose=true
           env:
             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
