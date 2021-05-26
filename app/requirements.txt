@@ -2,4 +2,5 @@ Flask
 coverage
 pytest
 pytest-cov
+pytest-flask
 wemake-python-styleguide
