@@ -27,9 +27,15 @@ jobs:
         
         - name: SonarQube Scan
           uses: sonarsource/sonarqube-scan-action@master
+          with:
+            args: >
+              -Dsonar.python.coverage.reportPaths=coverage.xml
+              -Dsonar.projectKey=python-demo
+              -Dsonar.verbose=true
           env:
             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
             SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
                  
         - name: wemake-python-styleguide
           uses: wemake-services/wemake-python-styleguide@0.15.2
