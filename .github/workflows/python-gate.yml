@@ -24,12 +24,12 @@ jobs:
         - name: Test with pytest
           run: |
             pytest --cov=./ --cov-report=xml
+            - name: SonarQube Scan
             
-        - name: SonarQube Scan
-          uses: kitabisa/sonarqube-action@v1.1.0
-          with:
-            host: ${{ secrets.SONARQUBE_HOST }}
-            login: ${{ secrets.SONARQUBE_TOKEN }}
+        - uses: sonarsource/sonarqube-scan-action@master
+          env:
+            SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+            SONAR_HOST_URL: ${{ secrets.SONARQUBE_HOST }}
                  
         - name: wemake-python-styleguide
           uses: wemake-services/wemake-python-styleguide@0.15.2
