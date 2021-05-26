@@ -5,6 +5,7 @@ from flask import make_response
 def create_app():
    # create a minimal app
    app = Flask(__name__)
+   app.debug = False
 
    # returns cat giphy
    @app.route('/cats')
@@ -12,6 +13,7 @@ def create_app():
     resp = make_response(render_template('cats.html'));
     resp.headers["Content-Type"] = "text/html"
     return resp
+
 
    return app
 
