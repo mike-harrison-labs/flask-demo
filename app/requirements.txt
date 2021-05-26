@@ -1,0 +1,7 @@
+Flask==0.3
+coverage
+flask-s3
+pytest
+pytest-cov
+flask-cors
+wemake-python-styleguide
