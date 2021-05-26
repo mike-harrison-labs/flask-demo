@@ -1,6 +1,6 @@
 Flask
 coverage
-flask-s3
 pytest-flask
+pytest
 pytest-cov
 wemake-python-styleguide
