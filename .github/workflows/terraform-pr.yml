@@ -1,0 +1,109 @@
+# This workflow installs the latest version of Terraform CLI.
+# On pull request events, this workflow will run `terraform init`, `terraform fmt`, and `terraform plan` and post the output to a pr
+# 
+# It will also run a TF security check using https://github.com/marketplace/actions/terraform-security-scan
+# and will run a cloud cost estimate using https://www.infracost.io/docs/
+# To use this workflow, you will need to complete the following setup steps.
+#
+# 1. Create a `main.tf` file in the root of this repository with the `remote` backend and one or more resources defined.
+#   Example `main.tf`:
+#     The configuration for the `remote` backend.
+#     terraform {
+#       backend "s3" {
+#        bucket = "bucket"
+#        key    = "key"
+#        region = "region"
+#        acl    = "bucket-owner-full-control"
+#      }
+#     }
+#
+#     An example resource that does nothing.
+#     resource "null_resource" "example" {
+#       triggers = {
+#         value = "A example resource that does nothing!"
+#       }
+#     }
+#
+#
+# 2. Generate an api key using https://www.infracost.io/docs/ and add it to GitHub Secrets
+#
+# 3. Generate an aws access key ID and secret access key and add it to GitHub Secrets
+
+name: terraform-pr
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+     - main
+    paths:
+     - '**.tf'
+
+jobs:
+  pr-check:
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2.3.4
+    - uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 0.14.9
+    - name: Terraform fmt
+      id: fmt
+      run: terraform fmt -check
+      continue-on-error: true
+
+    - name: Terraform Init
+      id: init
+      run: terraform init
+
+    - name: Terraform Validate
+      id: validate
+      run: terraform validate -no-color
+
+    - name: Terraform Plan
+      id: plan
+      run: terraform plan -no-color -out ./plan
+      continue-on-error: true
+
+    - uses: actions/github-script@0.9.0
+      if: github.event_name == 'pull_request'
+      env:
+        PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+          #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+          #### Terraform Validation 🤖\`${{ steps.validate.outcome.stdout }}\`
+          #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+          <details><summary>Show Plan</summary>
+          \`\`\`\n
+          ${process.env.PLAN}
+          \`\`\`
+          </details>
+          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+          github.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: output
+          })
+          
+    - name: Run infracost diff
+      uses: infracost/infracost-gh-action@master # Use a specific version instead of master if locking is preferred
+      env:
+        INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Do not change
+        # See the cloud credentials section for the options
+      with:
+        entrypoint: /scripts/ci/diff.sh # Do not change
+        path: ./plan
+        terraform_plan_flags: -var-file=my.tfvars
+        
+    - uses: triat/terraform-security-scan@v2.2.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
