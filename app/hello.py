@@ -4,11 +4,11 @@ from flask import make_response
 
 # app = Flask(__name__)
 
-# @app.route("/cats")
-# def cats():
-#     resp = make_response(render_template('cats.html'));
-#     resp.headers["Content-Type"] = "text/html"
-#     return resp
+@app.route("/cats")
+def cats():
+    resp = make_response(render_template('cats.html'));
+    resp.headers["Content-Type"] = "text/html"
+    return resp
 
 
 # if __name__ == '__main__':
